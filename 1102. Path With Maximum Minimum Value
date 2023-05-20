@@ -1,0 +1,105 @@
+Given an m x n integer matrix grid, return the maximum score of a path starting at (0, 0) and ending at (m - 1, n - 1) moving in the 4 cardinal directions.
+
+The score of a path is the minimum value in that path.
+
+    For example, the score of the path 8 → 4 → 5 → 9 is 4.
+
+ 
+
+Example 1:
+
+Input: grid = [[5,4,5],[1,2,6],[7,4,6]]
+Output: 4
+Explanation: The path with the maximum score is highlighted in yellow. 
+
+Example 2:
+
+Input: grid = [[2,2,1,2,2,2],[1,2,2,2,1,2]]
+Output: 2
+
+Example 3:
+
+Input: grid = [[3,4,6,3,4],[0,2,1,1,7],[8,8,3,2,7],[3,2,4,9,8],[4,1,2,0,0],[4,6,5,4,3]]
+Output: 3
+
+ 
+
+Constraints:
+
+    m == grid.length
+    n == grid[i].length
+    1 <= m, n <= 100
+    0 <= grid[i][j] <= 109
+
+
+
+// C++ || Union Find || Great question
+
+class Solution {
+public:
+    int uf[100001];
+    int rank[100001];
+    int find(int x) {
+        if(uf[x] == x) {
+            return uf[x];
+        }
+        return find(uf[x]);
+    }
+
+    void union1(int x, int y) {
+        if(find(x) == find(y)) {
+            return;
+        }
+        if(rank[find(x)] < rank[find(y)]) {
+            uf[find(x)] = uf[find(y)];
+        } else if(rank[find(x)] > rank[find(y)]) {
+            uf[find(y)] = uf[find(x)];
+        } else {
+            uf[find(x)] = uf[find(y)];
+            rank[find(y)]++;
+        }
+    }
+
+    int dx[4] = {1,0,-1,0};
+    int dy[4] = {0,1,0,-1};
+
+    int maximumMinimumPath(vector<vector<int>>& grid) {
+        for(int i = 0; i < 100001; i++) {
+            uf[i] = i;
+            rank[i] = 0;
+        }
+        map<int, vector<int>> valPosMap;
+        int n = grid.size();
+        int m = grid[0].size();
+        for(int i = 0; i < n; i++) {
+            for(int j = 0; j < m; j++) {
+                valPosMap[grid[i][j]].push_back(i * m + j);
+            }
+        }
+
+        for(auto it = valPosMap.rbegin(); it != valPosMap.rend(); it++) {
+            int val = it->first;
+            vector<int> positions = it->second;
+            for(int pos : positions) {
+                int x = pos / m;
+                int y = pos % m;
+                for(int i = 0; i < 4; i++) {
+                    int nx = x + dx[i];
+                    int ny = y + dy[i];
+                    if(nx < 0 || ny < 0 || nx >= n || ny >= m) {
+                        continue;
+                    }
+                    if(grid[nx][ny] < grid[x][y]) {
+                        continue;
+                    }
+                    int npos = nx * m + ny;
+                    union1(pos, npos);
+                }
+            }
+            if(find(0) == find((n - 1) * m + m - 1)) {
+                return val;
+            }
+        }
+        return -1;
+    }
+};
