@@ -1,0 +1,117 @@
+Given a rows x cols screen and a sentence represented as a list of strings, return the number of times the given sentence can be fitted on the screen.
+
+The order of words in the sentence must remain unchanged, and a word cannot be split into two lines. A single space must separate two consecutive words in a line.
+
+ 
+
+Example 1:
+
+Input: sentence = ["hello","world"], rows = 2, cols = 8
+Output: 1
+Explanation:
+hello---
+world---
+The character '-' signifies an empty space on the screen.
+
+Example 2:
+
+Input: sentence = ["a", "bcd", "e"], rows = 3, cols = 6
+Output: 2
+Explanation:
+a-bcd- 
+e-a---
+bcd-e-
+The character '-' signifies an empty space on the screen.
+
+Example 3:
+
+Input: sentence = ["i","had","apple","pie"], rows = 4, cols = 5
+Output: 1
+Explanation:
+i-had
+apple
+pie-i
+had--
+The character '-' signifies an empty space on the screen.
+
+ 
+
+Constraints:
+
+    1 <= sentence.length <= 100
+    1 <= sentence[i].length <= 10
+    sentence[i] consists of lowercase English letters.
+    1 <= rows, cols <= 2 * 104
+
+// C++ || DP to store intermediate answers || Great question
+
+class Solution {
+public:
+
+    int R;
+    int C;
+    int N;
+    int accommodateAsManyWordsInEachRow(vector<string> &sentence) {
+        int dp[20001][101]; // {width covered in row, cur pos (right)} -> increment in ans
+        int ans = 0;
+        int width = sentence[0].size() + 1 <= C ? sentence[0].size() + 1 : sentence[0].size();
+        int right = 1 % N;
+        if(right == 0) {
+            ans++;
+        }
+        int row = 0;
+        while(row < R) {
+            // cout << "row = " << row << endl;
+            // cout << "right = " << right << endl;
+            // cout << "width = " << width << endl;
+            if(width + 1 + sentence[right].size() <= C) {
+                width += 1 + sentence[right].size();
+                // cout << sentence[right] << " , ";
+                right = (right + 1) % N;
+                if(right == 0) {
+                    ans++;
+                }
+                // cout << "width = " << width << endl; 
+            } else if(width + sentence[right].size() == C) {
+                width += sentence[right].size();
+                // cout << sentence[right] << " , ";
+                right = (right + 1) % N;
+                if(right == 0) {
+                    ans++;
+                }
+                // cout << "width = " << width << endl;
+            } else {
+                row++;
+                width = 0;
+                // cout << "width = " << width << endl;
+            }
+            // cout << "right second = " << right << endl;
+            // cout << "ans = " << ans << endl; 
+        }
+        return ans;
+    }
+
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        R = rows, C = cols; N = sentence.size();
+        for(int i = 0; i < N; i++) {
+            if(sentence[i].size() > cols) {
+                return 0;
+            }
+        }
+        return accommodateAsManyWordsInEachRow(sentence);
+    }
+};
+
+/*
+    8 * 7
+       0. 1. 2. 3. 4. 5. 6. 
+    0. f     p     a     f
+    1. 
+    2.
+    3.
+    4.
+    5.
+    6.
+    7.
+
+*/
